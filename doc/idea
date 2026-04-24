@@ -1,0 +1,13 @@
+Expense Tracker – Ứng dụng quản lý chi tiêu cá nhân
+Yêu cầu: Xây dựng ứng dụng theo dõi thu/chi, phân loại và báo cáo chi tiêu hằng tháng. 
+
+Mô tả: Người dùng tạo Transactions (thu/chi), gắn Category, xem Dashboard theo ngày/tuần/tháng. Hỗ trợ lọc, tìm kiếm, và export CSV đơn giản.
+
+Phát triển theo flow của spec driven development
+Dùng Next.js (cả BE lẫn FE), Typescript, Supabase, deploy Vercel. 
+
+Dữ liệu bổ sung từ ý kiến người dùng:
+- Ưu tiên phát triển: Dashboard (báo cáo/tổng quan chi tiêu)
+- Giao diện: Đơn giản, dễ dùng
+- Category mặc định: nhà ở, sinh hoạt, giải trí, đầu tư, khác
+- Ứng dụng cần có đăng nhập/xác thực người dùng
