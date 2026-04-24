@@ -7,6 +7,7 @@ import { Transaction, Category } from '@/types'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { authenticatedFetch } from '@/lib/auth-fetch'
 import { TransactionFilter, TransactionFilters } from './TransactionFilter'
+import { ExportButton } from './ExportButton'
 
 interface TransactionListProps {
   categories: Category[]
@@ -113,6 +114,16 @@ export function TransactionList({ categories }: TransactionListProps) {
         onFilterChange={handleFilterChange}
         onReset={handleFilterReset}
       />
+
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <ExportButton
+          startDate={filters.startDate}
+          endDate={filters.endDate}
+          categoryId={filters.categoryIds?.[0]}
+          type={filters.type as 'income' | 'expense' | undefined}
+        />
+      </div>
 
       {error && (
         <div className="rounded-md bg-red-50 p-4">
