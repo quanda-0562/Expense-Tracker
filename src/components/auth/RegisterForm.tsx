@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registerSchema, type RegisterInput } from '@/lib/validations'
@@ -14,7 +13,6 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const { register: registerUser, loading, error } = useAuth()
-  const router = useRouter()
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const {
@@ -28,11 +26,19 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const onSubmit = async (data: RegisterInput) => {
     try {
       setSubmitError(null)
+      console.log('📝 Attempting registration with email:', data.email)
       await registerUser(data.email, data.password, data.display_name)
+      console.log('✅ Registration successful')
+      
+      // Wait a bit for session to be fully established
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      console.log('📞 Calling onSuccess callback')
       onSuccess?.()
-      router.push('/dashboard')
+      // Don't call router.push here - let parent page handle it
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Registration failed'
+      console.error('❌ Registration error:', message, err)
       setSubmitError(message)
     }
   }
