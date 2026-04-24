@@ -50,21 +50,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true)
       setError(null)
+      console.log('[Auth] Login attempt:', email)
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-      if (authError) throw authError
-      if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email || '',
-          created_at: data.user.created_at || new Date().toISOString(),
-          updated_at: data.user.updated_at || new Date().toISOString(),
-        })
+      console.log('[Auth] Supabase response:', { user: data.user?.email, error: authError?.message })
+      if (authError) {
+        console.error('[Auth] Auth error:', authError)
+        throw authError
       }
+      if (!data.user) {
+        throw new Error('No user returned from login')
+      }
+      setUser({
+        id: data.user.id,
+        email: data.user.email || '',
+        created_at: data.user.created_at || new Date().toISOString(),
+        updated_at: data.user.updated_at || new Date().toISOString(),
+      })
+      console.log('[Auth] Login success:', data.user.email)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed'
+      console.error('[Auth] Login error:', message, err)
       setError(message)
       throw err
     } finally {

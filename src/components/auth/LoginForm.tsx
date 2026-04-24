@@ -28,11 +28,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const onSubmit = async (data: LoginInput) => {
     try {
       setSubmitError(null)
+      console.log('🔐 Attempting login with email:', data.email)
       await login(data.email, data.password)
+      console.log('✅ Login successful')
       onSuccess?.()
       router.push('/dashboard')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed'
+      console.error('❌ Login error:', message, err)
       setSubmitError(message)
     }
   }
