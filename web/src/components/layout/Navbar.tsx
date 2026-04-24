@@ -59,6 +59,12 @@ export function Navbar() {
             >
               Budgets
             </Link>
+            <Link
+              href="/dashboard/recurring"
+              className="text-gray-700 hover:text-blue-600 font-medium"
+            >
+              Recurring
+            </Link>
 
             {/* User Menu */}
             <div className="flex items-center space-x-4 border-l pl-4">
