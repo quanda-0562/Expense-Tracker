@@ -8,7 +8,7 @@ import { RegisterForm } from '@/components/auth/RegisterForm'
 export default function RegisterPage() {
   const router = useRouter()
   const { user, loading } = useAuth()
-  const redirectTimeoutRef = useRef<NodeJS.Timeout>()
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   // If already logged in, redirect to dashboard
   useEffect(() => {
