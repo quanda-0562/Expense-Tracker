@@ -46,8 +46,19 @@ function getAuthenticatedClient(token: string) {
 }
 
 /**
- * GET /api/transactions?page=1&limit=20
- * Get all transactions for current user with pagination
+ * GET /api/transactions
+ * Get transactions with advanced filtering and pagination
+ * 
+ * Query params:
+ * - page: number (default: 1)
+ * - limit: number (default: 20, max: 100)
+ * - startDate: string (YYYY-MM-DD)
+ * - endDate: string (YYYY-MM-DD)
+ * - categoryIds: string (comma-separated category IDs)
+ * - type: string (income|expense)
+ * - minAmount: number
+ * - maxAmount: number
+ * - search: string (search in description)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -70,21 +81,63 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get pagination params
+    // Get query params
     const searchParams = request.nextUrl.searchParams
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
     const limit = Math.min(100, parseInt(searchParams.get('limit') || '20'))
     const offset = (page - 1) * limit
 
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
+    const categoryIds = searchParams.get('categoryIds')?.split(',').filter(Boolean) || []
+    const type = searchParams.get('type') as 'income' | 'expense' | null
+    const minAmount = searchParams.get('minAmount')
+    const maxAmount = searchParams.get('maxAmount')
+    const search = searchParams.get('search')
+
     // Create authenticated client for this request
     const authClient = getAuthenticatedClient(token)
 
-    // Get transactions
-    const { data, error, count } = await authClient
+    // Build query
+    let query = authClient
       .from('transactions')
       .select('*', { count: 'exact' })
       .eq('user_id', user.id)
       .is('deleted_at', null)
+
+    // Apply date filters
+    if (startDate) {
+      query = query.gte('transaction_date', startDate)
+    }
+    if (endDate) {
+      query = query.lte('transaction_date', endDate)
+    }
+
+    // Apply category filter
+    if (categoryIds.length > 0) {
+      query = query.in('category_id', categoryIds)
+    }
+
+    // Apply type filter
+    if (type) {
+      query = query.eq('type', type)
+    }
+
+    // Apply amount filters
+    if (minAmount) {
+      query = query.gte('amount', parseFloat(minAmount))
+    }
+    if (maxAmount) {
+      query = query.lte('amount', parseFloat(maxAmount))
+    }
+
+    // Apply search filter (description contains)
+    if (search) {
+      query = query.or(`description.ilike.%${search}%`)
+    }
+
+    // Order and paginate
+    const { data, error, count } = await query
       .order('transaction_date', { ascending: false })
       .range(offset, offset + limit - 1)
 

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Transaction, Category } from '@/types'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { authenticatedFetch } from '@/lib/auth-fetch'
+import { TransactionFilter, TransactionFilters } from './TransactionFilter'
 
 interface TransactionListProps {
   categories: Category[]
@@ -18,16 +19,38 @@ export function TransactionList({ categories }: TransactionListProps) {
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [filters, setFilters] = useState<TransactionFilters>({})
+
+  useEffect(() => {
+    setPage(1) // Reset to first page when filters change
+  }, [filters])
 
   useEffect(() => {
     fetchTransactions()
-  }, [page])
+  }, [page, filters])
 
   const fetchTransactions = async () => {
     try {
       setError(null)
       setLoading(true)
-      const response = await authenticatedFetch(`/api/transactions?page=${page}&limit=20`)
+
+      // Build query string with filters
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '20',
+      })
+
+      if (filters.startDate) params.append('startDate', filters.startDate)
+      if (filters.endDate) params.append('endDate', filters.endDate)
+      if (filters.type) params.append('type', filters.type)
+      if (filters.search) params.append('search', filters.search)
+      if (filters.minAmount !== undefined) params.append('minAmount', filters.minAmount.toString())
+      if (filters.maxAmount !== undefined) params.append('maxAmount', filters.maxAmount.toString())
+      if (filters.categoryIds && filters.categoryIds.length > 0) {
+        params.append('categoryIds', filters.categoryIds.join(','))
+      }
+
+      const response = await authenticatedFetch(`/api/transactions?${params.toString()}`)
 
       if (!response.ok) {
         throw new Error('Failed to fetch transactions')
@@ -66,6 +89,14 @@ export function TransactionList({ categories }: TransactionListProps) {
     }
   }
 
+  const handleFilterChange = (newFilters: TransactionFilters) => {
+    setFilters(newFilters)
+  }
+
+  const handleFilterReset = () => {
+    setFilters({})
+  }
+
   const getCategoryName = (categoryId: string) => {
     return categories.find((c) => c.id === categoryId)?.name || 'Unknown'
   }
@@ -76,6 +107,13 @@ export function TransactionList({ categories }: TransactionListProps) {
 
   return (
     <div className="space-y-4">
+      {/* Filter */}
+      <TransactionFilter
+        categories={categories}
+        onFilterChange={handleFilterChange}
+        onReset={handleFilterReset}
+      />
+
       {error && (
         <div className="rounded-md bg-red-50 p-4">
           <p className="text-sm font-medium text-red-800">{error}</p>
@@ -84,7 +122,7 @@ export function TransactionList({ categories }: TransactionListProps) {
 
       {transactions.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-600 mb-4">No transactions yet</p>
+          <p className="text-gray-600 mb-4">No transactions found</p>
           <Link href="/dashboard/transactions/new" className="text-blue-600 hover:text-blue-500">
             Add your first transaction
           </Link>
