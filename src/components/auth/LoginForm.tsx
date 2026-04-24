@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginInput } from '@/lib/validations'
@@ -14,7 +13,6 @@ interface LoginFormProps {
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const { login, loading, error } = useAuth()
-  const router = useRouter()
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const {
@@ -30,14 +28,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       setSubmitError(null)
       console.log('🔐 Attempting login with email:', data.email)
       await login(data.email, data.password)
-      console.log('✅ Login successful, waiting for session...')
+      console.log('✅ Login successful')
       
-      // Wait a bit for session to be fully established before navigating
+      // Wait a bit for session to be fully established
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      console.log('🔄 Redirecting to dashboard...')
+      console.log('📞 Calling onSuccess callback')
       onSuccess?.()
-      router.push('/dashboard')
+      // Don't call router.push here - let parent page handle it
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed'
       console.error('❌ Login error:', message, err)
