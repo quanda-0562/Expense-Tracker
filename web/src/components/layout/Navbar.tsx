@@ -47,6 +47,12 @@ export function Navbar() {
             >
               Transactions
             </Link>
+            <Link
+              href="/dashboard/reports"
+              className="text-gray-700 hover:text-blue-600 font-medium"
+            >
+              Reports
+            </Link>
 
             {/* User Menu */}
             <div className="flex items-center space-x-4 border-l pl-4">
