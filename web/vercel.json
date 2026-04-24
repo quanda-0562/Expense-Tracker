@@ -1,4 +1,5 @@
 {
+  "root": "web",
   "buildCommand": "next build",
   "outputDirectory": ".next",
   "installCommand": "npm ci",
