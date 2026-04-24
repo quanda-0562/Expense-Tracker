@@ -48,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
+      setLoading(true)
       setError(null)
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
@@ -66,11 +67,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const message = err instanceof Error ? err.message : 'Login failed'
       setError(message)
       throw err
+    } finally {
+      setLoading(false)
     }
   }
 
   const register = async (email: string, password: string, displayName?: string) => {
     try {
+      setLoading(true)
       setError(null)
       const { data, error: authError } = await supabase.auth.signUp({
         email,
@@ -90,11 +94,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const message = err instanceof Error ? err.message : 'Registration failed'
       setError(message)
       throw err
+    } finally {
+      setLoading(false)
     }
   }
 
   const logout = async () => {
     try {
+      setLoading(true)
       setError(null)
       const { error: authError } = await supabase.auth.signOut()
       if (authError) throw authError
@@ -103,11 +110,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const message = err instanceof Error ? err.message : 'Logout failed'
       setError(message)
       throw err
+    } finally {
+      setLoading(false)
     }
   }
 
   const resetPassword = async (email: string) => {
     try {
+      setLoading(true)
       setError(null)
       const { error: authError } = await supabase.auth.resetPasswordForEmail(email)
       if (authError) throw authError
@@ -115,6 +125,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const message = err instanceof Error ? err.message : 'Password reset failed'
       setError(message)
       throw err
+    } finally {
+      setLoading(false)
     }
   }
 
