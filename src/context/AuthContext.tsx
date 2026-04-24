@@ -21,13 +21,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Check if user is logged in on mount
+  // Listen to auth state changes from Supabase
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('[Auth] State changed:', event, session?.user?.email)
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            created_at: session.user.created_at || new Date().toISOString(),
+            updated_at: session.user.updated_at || new Date().toISOString(),
+          })
+        } else {
+          setUser(null)
+        }
+        setLoading(false)
+      }
+    )
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // Check if user is logged in on mount (for initial load)
   useEffect(() => {
     const checkUser = async () => {
       try {
         const {
           data: { session },
         } = await supabase.auth.getSession()
+        console.log('[Auth] Initial session check:', session?.user?.email)
         if (session?.user) {
           setUser({
             id: session.user.id,

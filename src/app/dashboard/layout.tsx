@@ -10,7 +10,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
+    console.log('[Dashboard] Auth state:', { user: user?.email, loading })
     if (!loading && !user) {
+      console.log('[Dashboard] No user, redirecting to login')
       router.push('/auth/login')
     }
   }, [loading, user, router])
@@ -18,7 +20,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-600">Loading...</p>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     )
   }

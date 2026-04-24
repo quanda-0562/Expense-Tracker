@@ -30,7 +30,12 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       setSubmitError(null)
       console.log('🔐 Attempting login with email:', data.email)
       await login(data.email, data.password)
-      console.log('✅ Login successful')
+      console.log('✅ Login successful, waiting for session...')
+      
+      // Wait a bit for session to be fully established before navigating
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      console.log('🔄 Redirecting to dashboard...')
       onSuccess?.()
       router.push('/dashboard')
     } catch (err) {
